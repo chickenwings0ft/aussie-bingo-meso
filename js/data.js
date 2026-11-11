@@ -355,13 +355,14 @@ export const CELLS = [
 //   track       canción que suena en esa diapositiva ('spotify:track:ID')
 //   background  foto a pantalla completa: { src, alt, position, dim }
 //               (dim: true la oscurece para que se lea bien lo de encima)
-//   sticker     foto recortada con fondo transparente (solo en big): { src, alt }
+//   sticker     foto recortada con fondo transparente (en big y text): { src, alt, effect }
+//               (effect: 'crash' = entra de golpe con sacudida y 💥)
 //   shot        foto entera enmarcada (solo en loading): { src, alt, rec }
 //               (rec: true le pone el «● REC» de cámara grabando)
 //   flag        true = bandera de Australia
 //   critters    bichos animados: 'koala-hang' (koala colgado de una rama),
 //               'koala-peek' (koala asomándose), 'roo-hop' (canguro saltando),
-//               'rain' (lluvia de koalas y canguros)
+//               'rain' (lluvia de koalas y canguros), 'tape' (cinta de peligro)
 export const PRELAUNCH = {
   unlockAt: '2026-12-01T09:30:00+10:00', // 1 dic, 9:30 en Gold Coast (Queensland, UTC+10)
   departureAt: '2026-11-28T12:00:00+01:00', // sábado 28 nov, hora de España (hora provisional)
@@ -482,6 +483,19 @@ export const PRELAUNCH = {
       },
       seconds: 7,
       track: 'spotify:track:2zYzyRzz6pRmhPzyfMEC8s', // Highway to Hell · AC/DC
+    },
+    {
+      type: 'text',
+      theme: 'ink',
+      critters: ['tape'],
+      text: 'La hemos liado mucho, hermanito. Te recuerdo cuál fue la última: espero que esta historia no se parezca nada a cómo acabamos aquella vez…',
+      sticker: {
+        src: 'assets/fotos/coche.webp',
+        alt: 'El coche con el morro abollado y el faro roto',
+        effect: 'crash',
+      },
+      seconds: 11,
+      track: 'spotify:track:6HSXNV0b4M4cLJ7ljgVVeh', // Knockin' On Heaven's Door · Bob Dylan
     },
     {
       // Última diapositiva: se queda fija con los dos contadores.

@@ -94,6 +94,12 @@ const CRITTERS = {
     wrap.append(hop);
     return wrap;
   },
+  tape() {
+    const wrap = el('div', 'pl-critter pl-critter--tape');
+    const label = Array(8).fill('PELIGRO').join(' · ');
+    wrap.append(el('span', 'pl-tape pl-tape--a', label), el('span', 'pl-tape pl-tape--b', label));
+    return wrap;
+  },
   rain() {
     const wrap = el('div', 'pl-critter pl-critter--rain');
     for (let i = 0; i < 16; i++) {
@@ -113,6 +119,20 @@ function createCritters(list = []) {
   layer.setAttribute('aria-hidden', 'true');
   for (const name of list) if (CRITTERS[name]) layer.append(CRITTERS[name]());
   return layer;
+}
+
+// ── Pegatina: foto recortada con fondo transparente ─────────────────────────
+function createSticker(sticker, extraClass = '') {
+  const img = el('img', `pl-sticker ${extraClass}`.trim());
+  img.src = sticker.src;
+  img.alt = sticker.alt ?? '';
+  img.decoding = 'async';
+  if (sticker.effect !== 'crash') return img;
+  const wrap = el('div', 'pl-crash');
+  const boom = el('span', 'pl-boom', '💥');
+  boom.setAttribute('aria-hidden', 'true');
+  wrap.append(img, boom);
+  return wrap;
 }
 
 // ── Contenido de cada tipo de diapositiva ───────────────────────────────────
@@ -142,7 +162,9 @@ const BUILDERS = {
   },
 
   text(slide) {
-    return { nodes: [words(slide.text, 'pl-text')] };
+    const nodes = [words(slide.text, 'pl-text')];
+    if (slide.sticker?.src) nodes.push(createSticker(slide.sticker, 'pl-sticker--story'));
+    return { nodes };
   },
 
   hours(slide, targets) {
@@ -206,13 +228,7 @@ const BUILDERS = {
   big(slide) {
     const nodes = [el('p', 'pl-kicker pl-kicker--big', slide.title), el('p', 'pl-huge', slide.big)];
     if (slide.flag) nodes.unshift(createFlag());
-    if (slide.sticker?.src) {
-      const img = el('img', 'pl-sticker');
-      img.src = slide.sticker.src;
-      img.alt = slide.sticker.alt ?? '';
-      img.decoding = 'async';
-      nodes.push(img);
-    }
+    if (slide.sticker?.src) nodes.push(createSticker(slide.sticker));
     return { nodes };
   },
 

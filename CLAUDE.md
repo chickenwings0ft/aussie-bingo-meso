@@ -51,7 +51,7 @@ Todo se edita en `PRELAUNCH`, en `js/data.js`:
 - **Pegatina**: `sticker` (en la portada `start` y en las diapositivas `big`) es una foto recortada con fondo transparente (`assets/fotos/meso-luk.webp`). Para recortar otra foto: recorte de sujetos de macOS (Vision) y luego `cwebp -q 82 -alpha_q 90`.
 - **Bandera**: `assets/bandera-australia.svg`.
 - **Vista previa del enlace** (WhatsApp, etc.): `assets/og.jpg` (1200×630) y las etiquetas `og:` de `index.html`. El `<title>` y la vista previa no dicen «bingo» a propósito: el juego es sorpresa hasta el 1 dic.
-- **Koalas y canguros**: `critters` de cada diapositiva: `koala-hang`, `koala-peek`, `roo-hop`, `rain`. Son emojis animados.
+- **Koalas y canguros**: `critters` de cada diapositiva: `koala-hang`, `koala-peek`, `roo-hop`, `rain`, `tape` (cinta de peligro). Son emojis animados.
 - **Música**: cada diapositiva tiene su `track` (`spotify:track:ID`, de la playlist de `PRELAUNCH.playlist`). Se usa el reproductor oficial de Spotify con su API de inserción: al cambiar de diapositiva carga la canción y, si la música ya sonaba, la pone. La música arranca con «Empezar» (los navegadores no dejan sonar nada sin un toque). Sin sesión de Spotify suenan 30 s. Para sacar el id de una canción: en Spotify, Compartir → Copiar enlace, y el id es lo que va tras `/track/`. No subas archivos de música con copyright al repo: es público.
 
 **Modo árbitro**: abrir la web una vez con `#arbitro` al final de la URL enseña el bingo en ese dispositivo antes de la fecha (para probar y preparar la sincronización). El botón «Ver la intro» lo desactiva.
