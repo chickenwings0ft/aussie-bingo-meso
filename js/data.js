@@ -395,8 +395,8 @@ export const PRELAUNCH = {
         position: 'center 30%',
       },
       kicker: 'Meso Road Trip 2026',
-      title: 'Hello Mesonada',
-      text: 'Bienvenido al viaje de tu vida.',
+      title: 'Máximo Décimo Meridio',
+      text: 'Bienvenido al previaje del mejor viaje de tu vida.',
       seconds: 7,
       track: 'spotify:track:3ZZq9396zv8pcn5GYVhxUi', // Down Under · Men At Work
     },
