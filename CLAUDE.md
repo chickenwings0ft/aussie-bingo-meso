@@ -47,8 +47,9 @@ Todo se edita en `PRELAUNCH`, en `js/data.js`:
 - **Fechas**: `unlockAt` (activación del juego) y `departureAt` (salida de España). Llevan su huso horario.
 - **Marcar algo como conseguido**: en la diapositiva `loading` correspondiente (GoPro, tienda de campaña) pon `done: true`. En la de `progress` (planazos pagados) sube `done`.
 - **Textos y orden**: array `slides`. Tipos disponibles: `title`, `text`, `hours`, `loading`, `progress`, `big`, `final`. `theme` es `green`, `gold`, `ink` o `paper`; `seconds` es lo que dura en pantalla.
-- **Foto**: guarda la imagen en `assets/` y pon su ruta en `photo`. Sale en la primera diapositiva y en la última.
-- **Música**: `spotify` es la URI de Spotify de una playlist, álbum o canción (`spotify:playlist:ID`); se incrusta el reproductor oficial. No subas archivos de música con copyright al repo: es público.
+- **Fotos**: guárdalas en `assets/fotos/` (redimensionadas a ~1300 px) y ponlas en `background` de la diapositiva: `{ src, alt, position }`. Con `dim: true` la foto se oscurece para que se lea encima.
+- **Koalas y canguros**: `critters` de cada diapositiva: `koala-hang`, `koala-peek`, `roo-hop`, `rain`. Son emojis animados.
+- **Música**: cada diapositiva tiene su `track` (`spotify:track:ID`, de la playlist de `PRELAUNCH.playlist`). Se usa el reproductor oficial de Spotify con su API de inserción: al cambiar de diapositiva carga la canción y, si la música ya sonaba, la pone. La música arranca con «Empezar» (los navegadores no dejan sonar nada sin un toque). Sin sesión de Spotify suenan 30 s. Para sacar el id de una canción: en Spotify, Compartir → Copiar enlace, y el id es lo que va tras `/track/`. No subas archivos de música con copyright al repo: es público.
 
 **Modo árbitro**: abrir la web una vez con `#arbitro` al final de la URL enseña el bingo en ese dispositivo antes de la fecha (para probar y preparar la sincronización). El botón «Ver la intro» lo desactiva.
 

@@ -1,5 +1,6 @@
 // Intro previa al viaje: diapositivas tipo «stories» + cuenta atrás.
-// Todo el texto y las fechas salen de PRELAUNCH (data.js).
+// Todo el texto, las fotos, los bichos, las canciones y las fechas salen de
+// PRELAUNCH (data.js).
 import { PRELAUNCH } from './data.js';
 
 const SEEN_KEY = 'aussie-bingo-meso:prelaunch-seen';
@@ -84,26 +85,96 @@ function createFlag(extraClass = '') {
   return wrap;
 }
 
+// ── Fondo de cada diapositiva: color, sol, brillo y, si hay, foto ───────────
+function createBackground(slide) {
+  const bg = el('div', 'pl-bg');
+  if (slide.background?.src) {
+    const img = el('img', 'pl-bg__img');
+    img.src = slide.background.src;
+    img.alt = slide.background.alt ?? '';
+    img.decoding = 'async';
+    if (slide.background.position) img.style.objectPosition = slide.background.position;
+    bg.append(img, el('div', 'pl-bg__shade'));
+  }
+  const glow = el('div', 'pl-glow');
+  glow.setAttribute('aria-hidden', 'true');
+  bg.append(glow);
+  return bg;
+}
+
+// ── Koalas y canguros ───────────────────────────────────────────────────────
+const KOALA = '🐨';
+const ROO = '🦘';
+
+const CRITTERS = {
+  'koala-hang'() {
+    const wrap = el('div', 'pl-critter pl-critter--hang');
+    const swing = el('span', 'pl-swing');
+    swing.append(el('span', 'pl-emoji', KOALA));
+    wrap.append(el('span', 'pl-branch'), swing);
+    return wrap;
+  },
+  'koala-peek'() {
+    const wrap = el('div', 'pl-critter pl-critter--peek');
+    wrap.append(el('span', 'pl-emoji', KOALA));
+    return wrap;
+  },
+  'roo-hop'() {
+    const wrap = el('div', 'pl-critter pl-critter--hop');
+    const hop = el('span', 'pl-hop');
+    hop.append(el('span', 'pl-emoji', ROO));
+    wrap.append(hop);
+    return wrap;
+  },
+  rain() {
+    const wrap = el('div', 'pl-critter pl-critter--rain');
+    for (let i = 0; i < 16; i++) {
+      const drop = el('span', 'pl-emoji', i % 2 ? KOALA : ROO);
+      drop.style.setProperty('--x', `${(i * 61) % 100}%`);
+      drop.style.setProperty('--d', `${((i * 37) % 23) / 10}s`);
+      drop.style.setProperty('--s', `${1.6 + ((i * 13) % 9) / 10}s`);
+      drop.style.setProperty('--r', `${((i * 47) % 70) - 35}deg`);
+      wrap.append(drop);
+    }
+    return wrap;
+  },
+};
+
+function createCritters(list = []) {
+  const layer = el('div', 'pl-critters');
+  layer.setAttribute('aria-hidden', 'true');
+  for (const name of list) if (CRITTERS[name]) layer.append(CRITTERS[name]());
+  return layer;
+}
+
 // ── Contenido de cada tipo de diapositiva ───────────────────────────────────
 // Cada función devuelve los nodos y, si hace falta, un `tick` que se llama
 // cada segundo.
+
+// Texto que entra palabra a palabra.
+function words(text, className) {
+  const p = el('p', className);
+  p.setAttribute('aria-label', text);
+  text.split(' ').forEach((word, i) => {
+    const span = el('span', 'pl-word', word);
+    span.setAttribute('aria-hidden', 'true');
+    span.style.setProperty('--w', i);
+    p.append(span, ' ');
+  });
+  return p;
+}
+
 const BUILDERS = {
   title(slide) {
     const nodes = [];
-    if (PRELAUNCH.photo) {
-      const img = el('img', 'pl-photo');
-      img.src = PRELAUNCH.photo;
-      img.alt = PRELAUNCH.photoAlt ?? '';
-      nodes.push(img);
-    }
     if (slide.flag) nodes.push(createFlag());
     if (slide.kicker) nodes.push(el('p', 'pl-kicker', slide.kicker));
-    nodes.push(el('h2', 'pl-title', slide.title), el('p', 'pl-lead', slide.text));
+    nodes.push(el('h2', 'pl-title pl-title--glow', slide.title), el('p', 'pl-lead', slide.text));
     return { nodes };
   },
 
   text(slide) {
-    return { nodes: [el('p', 'pl-text', slide.text)] };
+    return { nodes: [words(slide.text, 'pl-text')] };
   },
 
   hours(slide, targets) {
@@ -121,10 +192,27 @@ const BUILDERS = {
   },
 
   loading(slide) {
+    const nodes = [];
+    if (slide.shot?.src) {
+      const frame = el('figure', 'pl-shot');
+      const img = el('img');
+      img.src = slide.shot.src;
+      img.alt = slide.shot.alt ?? '';
+      img.decoding = 'async';
+      frame.append(img);
+      if (slide.shot.rec) {
+        const rec = el('span', 'pl-shot__rec', 'REC');
+        rec.setAttribute('aria-hidden', 'true');
+        frame.append(rec, el('span', 'pl-shot__res', '5.3K60'));
+        frame.lastChild.setAttribute('aria-hidden', 'true');
+      }
+      nodes.push(frame);
+    }
     const bar = el('div', `pl-loader${slide.done ? ' is-done' : ''}`);
     bar.append(el('span'));
     const status = el('p', 'pl-status', slide.done ? slide.doneText : slide.loadingText);
-    return { nodes: [el('h2', 'pl-title pl-title--mid', slide.title), bar, status] };
+    nodes.push(el('h2', 'pl-title pl-title--mid pl-title--glow', slide.title), bar, status);
+    return { nodes };
   },
 
   progress(slide) {
@@ -155,14 +243,8 @@ const BUILDERS = {
 
   final(slide, targets) {
     const nodes = [];
-    if (PRELAUNCH.photo) {
-      const img = el('img', 'pl-photo pl-photo--small');
-      img.src = PRELAUNCH.photo;
-      img.alt = PRELAUNCH.photoAlt ?? '';
-      nodes.push(img);
-    }
     if (slide.flag) nodes.push(createFlag('pl-flag--small'));
-    nodes.push(el('h2', 'pl-title pl-title--mid', slide.title));
+    nodes.push(el('h2', 'pl-title pl-title--mid pl-title--glow', slide.title));
     const ticks = [];
     for (const counter of slide.counters) {
       const card = el('div', 'pl-counter');
@@ -192,37 +274,97 @@ const BUILDERS = {
   },
 };
 
-// ── Música: reproductor oficial de Spotify ──────────────────────────────────
-function mountSpotify(container, uri) {
-  const [, kind, id] = uri.split(':');
+// ── Música: reproductor oficial de Spotify, una canción por diapositiva ─────
+// El reproductor se controla con la API de inserción de Spotify: al cambiar de
+// diapositiva se carga su canción y, si la música ya estaba sonando, se pone.
+// Los navegadores solo dejan sonar audio después de que la persona toque algo,
+// por eso la música empieza con el botón «Empezar» (o con el play del propio
+// reproductor). Sin sesión de Spotify suenan fragmentos de 30 s.
+function mountSpotify(container, firstUri) {
   let controller = null;
-  const fallback = () => {
-    if (container.querySelector('iframe')) return;
+  let wanted = firstUri; // canción que debería estar cargada
+  let loaded = firstUri; // canción cargada en el reproductor
+  let active = false; // la música está «encendida»
+  let pending = false; // se ha pedido sonar y aún no ha arrancado
+  let fallbackTimer;
+
+  const playSoon = () => {
+    if (!controller || !active) return;
+    pending = true;
+    clearTimeout(fallbackTimer);
+    // Si el reproductor no avisa de que está listo, se intenta igualmente.
+    fallbackTimer = setTimeout(() => {
+      if (pending && active) controller.play();
+    }, 1200);
+  };
+
+  const load = (uri) => {
+    if (!controller || uri === loaded) return;
+    loaded = uri;
+    controller.loadUri(uri);
+    playSoon();
+  };
+
+  const slot = el('div');
+  container.append(slot);
+  window.onSpotifyIframeApiReady = (api) => {
+    api.createController(slot, { uri: firstUri, width: '100%', height: 80, theme: 'dark' }, (created) => {
+      controller = created;
+      controller.addListener('ready', () => {
+        if (pending && active) controller.play();
+      });
+      controller.addListener('playback_update', (event) => {
+        const data = event?.data;
+        if (!data) return;
+        if (!data.isPaused) {
+          active = true;
+          pending = false;
+          clearTimeout(fallbackTimer);
+        } else if (!pending && data.position > 0 && data.position < data.duration - 1000) {
+          // Pausa a mano: no se vuelve a poner sola al cambiar de diapositiva.
+          active = false;
+        }
+      });
+      if (wanted !== loaded) load(wanted);
+      else if (active) {
+        pending = true;
+        controller.play();
+      }
+    });
+  };
+
+  const script = el('script');
+  script.src = 'https://open.spotify.com/embed/iframe-api/v1';
+  script.async = true;
+  script.onerror = () => {
+    // Sin API: reproductor normal (no cambia de canción solo).
+    const [, kind, id] = firstUri.split(':');
     const frame = el('iframe');
     frame.src = `https://open.spotify.com/embed/${kind}/${id}?theme=0`;
     frame.title = 'Reproductor de Spotify';
     frame.allow = 'autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture';
-    frame.loading = 'lazy';
     container.append(frame);
   };
-  const slot = el('div');
-  container.append(slot);
-  window.onSpotifyIframeApiReady = (api) => {
-    api.createController(
-      slot,
-      { uri, width: '100%', height: 80, theme: 'dark' },
-      (created) => {
-        controller = created;
-      },
-    );
-  };
-  const script = el('script');
-  script.src = 'https://open.spotify.com/embed/iframe-api/v1';
-  script.async = true;
-  script.onerror = fallback;
   document.head.append(script);
-  // Algunos móviles solo dejan sonar si se toca el propio reproductor.
-  return { play: () => controller?.play?.() };
+
+  return {
+    // Primer toque de la persona: enciende la música.
+    start(uri) {
+      active = true;
+      wanted = uri || wanted;
+      if (!controller) return;
+      if (wanted !== loaded) load(wanted);
+      else {
+        pending = true;
+        controller.play();
+      }
+    },
+    setTrack(uri) {
+      if (!uri || uri === wanted) return;
+      wanted = uri;
+      load(uri);
+    },
+  };
 }
 
 // ── Montaje ─────────────────────────────────────────────────────────────────
@@ -238,15 +380,18 @@ export function initPrelaunch({ onUnlock }) {
   let index = -1; // -1 = pantalla de inicio
 
   const stage = el('div', 'pl-stage is-start');
+  stage.dataset.theme = 'ink';
   const bars = el('div', 'pl-bars');
   bars.setAttribute('aria-hidden', 'true');
   const deck = el('div', 'pl-deck');
 
   const sections = slides.map((slide, i) => {
-    const section = el('section', `pl-slide pl-slide--${slide.type} pl-theme--${slide.theme}`);
+    const classes = ['pl-slide', `pl-slide--${slide.type}`, `pl-theme--${slide.theme}`];
+    if (slide.background?.src) classes.push(slide.background.dim ? 'pl-slide--dim' : 'pl-slide--photo');
+    const section = el('section', classes.join(' '));
     section.hidden = true;
     section.setAttribute('aria-label', `Diapositiva ${i + 1} de ${slides.length}`);
-    section.append(el('div', 'pl-bg'));
+    section.append(createBackground(slide), createCritters(slide.critters));
     const body = el('div', 'pl-body');
     const { nodes, tick } = BUILDERS[slide.type](slide, targets);
     nodes.forEach((node, n) => {
@@ -266,22 +411,27 @@ export function initPrelaunch({ onUnlock }) {
   });
 
   // Pantalla de inicio
+  const intro = PRELAUNCH.start;
   const start = el('section', 'pl-slide pl-slide--start pl-theme--ink');
-  start.append(el('div', 'pl-bg'));
+  start.append(createBackground({}), createCritters(intro.critters));
   const startBody = el('div', 'pl-body');
-  const startButton = el('button', 'pl-button', flag.get() ? PRELAUNCH.start.again : PRELAUNCH.start.button);
+  const startButton = el('button', 'pl-button', flag.get() ? intro.again : intro.button);
   startButton.type = 'button';
-  const skipButton = el('button', 'pl-button pl-button--ghost', PRELAUNCH.start.skip);
+  const skipButton = el('button', 'pl-button pl-button--ghost', intro.skip);
   skipButton.type = 'button';
   skipButton.hidden = !flag.get();
-  if (PRELAUNCH.start.flag) startBody.append(createFlag());
+  if (intro.flag) startBody.append(createFlag());
   startBody.append(
-    el('p', 'pl-kicker', PRELAUNCH.start.kicker),
-    el('h1', 'pl-title pl-title--mid', PRELAUNCH.start.title),
+    el('p', 'pl-kicker', intro.kicker),
+    el('h1', 'pl-title pl-title--mid pl-title--glow', intro.title),
     startButton,
     skipButton,
   );
-  if (PRELAUNCH.spotify) startBody.append(el('p', 'pl-note', PRELAUNCH.start.hint));
+  if (intro.track) startBody.append(el('p', 'pl-note', intro.hint));
+  [...startBody.children].forEach((node, n) => {
+    node.classList.add('pl-in');
+    node.style.setProperty('--n', n);
+  });
   start.append(startBody);
   deck.append(start);
 
@@ -293,17 +443,18 @@ export function initPrelaunch({ onUnlock }) {
   next.type = 'button';
   next.setAttribute('aria-label', 'Siguiente');
 
-  const replay = el('button', 'pl-button pl-button--ghost pl-replay', PRELAUNCH.start.again);
+  const replay = el('button', 'pl-button pl-button--ghost pl-replay', intro.again);
   replay.type = 'button';
   sections[last].querySelector('.pl-body').append(replay);
 
   const music = el('div', 'pl-music');
+  const firstTrack = intro.track || slides.find((s) => s.track)?.track;
   let player = null;
   stage.append(bars, deck, prev, next);
-  if (PRELAUNCH.spotify) {
+  if (firstTrack) {
     stage.append(music);
     stage.classList.add('has-music');
-    player = mountSpotify(music, PRELAUNCH.spotify);
+    player = mountSpotify(music, firstTrack);
   }
   root.append(stage);
   root.hidden = false;
@@ -322,6 +473,7 @@ export function initPrelaunch({ onUnlock }) {
     [...bars.children].forEach((bar, i) => {
       bar.className = `pl-bar${i < index || index === last ? ' is-done' : i === index ? ' is-active' : ''}`;
     });
+    player?.setTrack(slides[index].track);
     if (index === last) flag.set();
   }
 
@@ -329,11 +481,15 @@ export function initPrelaunch({ onUnlock }) {
     if (event.target.parentElement?.classList.contains('is-active')) go(index + 1);
   });
   startButton.addEventListener('click', () => {
-    player?.play();
+    player?.start(slides[0].track);
     go(0);
   });
-  skipButton.addEventListener('click', () => go(last));
+  skipButton.addEventListener('click', () => {
+    player?.start(slides[last].track);
+    go(last);
+  });
   replay.addEventListener('click', () => go(0));
+
   // Tras deslizar, el navegador también lanza un «click» del mismo gesto:
   // ese se ignora. El siguiente toque vuelve a contar.
   let swiped = false;
@@ -386,6 +542,7 @@ export function initPrelaunch({ onUnlock }) {
   };
   stage.addEventListener('pointerup', endDrag);
   stage.addEventListener('pointercancel', endDrag);
+
   document.addEventListener('keydown', onKey);
   function onKey(event) {
     if (index < 0) return;

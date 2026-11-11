@@ -347,108 +347,150 @@ export const CELLS = [
 // ── Intro previa al viaje ────────────────────────────────────────────────────
 // Hasta `unlockAt` la web solo enseña esta intro (diapositivas + cuenta atrás).
 // A partir de esa fecha se enseña el bingo. Las fechas llevan su huso horario.
+//
+// Campos de cada diapositiva (todos opcionales salvo type y theme):
+//   type        title · text · hours · loading · progress · big · final
+//   theme       green · gold · ink · paper
+//   seconds     lo que dura en pantalla
+//   track       canción que suena en esa diapositiva ('spotify:track:ID')
+//   background  foto a pantalla completa: { src, alt, position, dim }
+//               (dim: true la oscurece para que se lea bien lo de encima)
+//   shot        foto entera enmarcada (solo en loading): { src, alt, rec }
+//               (rec: true le pone el «● REC» de cámara grabando)
+//   flag        true = bandera de Australia
+//   critters    bichos animados: 'koala-hang' (koala colgado de una rama),
+//               'koala-peek' (koala asomándose), 'roo-hop' (canguro saltando),
+//               'rain' (lluvia de koalas y canguros)
 export const PRELAUNCH = {
   unlockAt: '2026-12-01T09:30:00+10:00', // 1 dic, 9:30 en Gold Coast (Queensland, UTC+10)
   departureAt: '2026-11-28T12:00:00+01:00', // sábado 28 nov, hora de España (hora provisional)
-  // Música: URI de Spotify (playlist, álbum o canción); '' = sin música.
-  // Sale de un enlace open.spotify.com/playlist/ID → 'spotify:playlist:ID'.
-  spotify: 'spotify:playlist:0n9paMm83sdgSX4pSfzkbb',
-  photo: '', // ruta de la foto (p. ej. 'assets/nosotros.jpg'); '' = sin foto
-  photoAlt: 'Meso y Luk',
+  playlist: 'https://open.spotify.com/playlist/0n9paMm83sdgSX4pSfzkbb', // de aquí salen las canciones
 
-  // flag: true pinta la bandera de Australia (vale en start y en las
-  // diapositivas title, big y final).
   start: {
     flag: true,
+    critters: ['koala-hang'],
+    track: 'spotify:track:2ctvdKmETyOzPb2GiJJT53', // Breathe (In the Air) · Pink Floyd
     kicker: 'Meso Road Trip 2026',
     title: 'Tienes un mensaje',
     button: 'Empezar',
     again: 'Verlo otra vez',
     skip: 'Ir a la cuenta atrás',
-    hint: 'Sube el volumen y dale al play de abajo.',
+    hint: 'Sube el volumen: cada diapositiva tiene su canción.',
   },
 
-  // Tipos: title · text · hours · loading · progress · big · final
-  // theme: green · gold · ink · paper      seconds: lo que dura en pantalla
   slides: [
     {
       type: 'title',
       theme: 'green',
       flag: true,
+      background: {
+        src: 'assets/fotos/tiburon.jpg',
+        alt: 'Selfie bajo el agua haciendo el shaka con un tiburón blanco detrás',
+        position: 'center 30%',
+      },
       kicker: 'Meso Road Trip 2026',
       title: 'Hello Mesonada',
       text: 'Bienvenido al viaje de tu vida.',
-      seconds: 5,
+      seconds: 7,
+      track: 'spotify:track:3ZZq9396zv8pcn5GYVhxUi', // Down Under · Men At Work
     },
     {
       type: 'text',
       theme: 'gold',
+      critters: ['roo-hop'],
       text: 'Como sé que tienes ganas y chicken más, se ha preparado una web donde el 1 de diciembre se activará un juego que durará hasta el final del viaje.',
-      seconds: 9,
+      seconds: 10,
+      track: 'spotify:track:5gB2IrxOCX2j9bMnHKP38i', // Life is a Highway · Rascal Flatts
     },
     {
       type: 'text',
       theme: 'ink',
+      critters: ['koala-peek'],
       text: 'De momento no te voy a decir nada del juego, pero mientras tanto…',
-      seconds: 5,
+      seconds: 6,
+      track: 'spotify:track:7wCmS9TTVUcIhRalDYFgPy', // Where Is My Mind? · Pixies
     },
     {
       type: 'hours',
       theme: 'paper',
+      critters: ['roo-hop'],
       kicker: 'Horas hasta que salgas de España',
       unit: 'horas',
       doneText: '¡Ya estás en camino!',
-      seconds: 6,
+      seconds: 7,
+      track: 'spotify:track:3TO7bbrUKrOSPGRTB5MeCz', // Time · Pink Floyd
     },
     {
       // Cambia done a true cuando la tenga.
       type: 'loading',
       theme: 'green',
+      background: { src: 'assets/fotos/surf-koala.jpg', alt: '', dim: true },
+      // Foto entera, enmarcada como la pantalla de una GoPro grabando.
+      shot: {
+        src: 'assets/fotos/surf-koala.jpg',
+        alt: 'Surfeando dentro de un tubo mientras un koala cuelga de una rama',
+        rec: true,
+      },
       title: 'GoPro Hero 13',
       done: false,
       loadingText: 'Loading…',
       doneText: 'Completado',
-      seconds: 5,
+      seconds: 7,
+      track: 'spotify:track:6K4t31amVTZDgR3sKmwUJJ', // The Less I Know The Better · Tame Impala
     },
     {
       // Cambia done a true cuando la tenga.
       type: 'loading',
       theme: 'gold',
+      critters: ['koala-hang'],
       title: 'Tienda de campaña',
       done: false,
       loadingText: 'Loading…',
       doneText: 'Completado',
-      seconds: 5,
+      seconds: 6,
+      track: 'spotify:track:5l9c6bJmzvftumhz4TMPgk', // Harvest Moon · Neil Young
     },
     {
       // Sube `done` según se vayan pagando.
       type: 'progress',
       theme: 'ink',
+      critters: ['roo-hop'],
       title: 'Planazos pagados guapos',
       done: 5,
       total: 8,
       unit: 'pagados',
-      seconds: 6,
+      seconds: 7,
+      track: 'spotify:track:3ZOEytgrvLwQaqXreDs2Jx', // Can't Stop · Red Hot Chili Peppers
     },
     {
       type: 'big',
       theme: 'green',
       flag: true,
+      critters: ['rain'],
       title: 'Engorile',
       big: 'x1.000',
-      seconds: 5,
+      seconds: 7,
+      track: 'spotify:track:2zYzyRzz6pRmhPzyfMEC8s', // Highway to Hell · AC/DC
     },
     {
       // Última diapositiva: se queda fija con los dos contadores.
       type: 'final',
       theme: 'ink',
       flag: true,
+      critters: ['koala-hang'],
+      background: {
+        src: 'assets/fotos/tiburon.jpg',
+        alt: '',
+        position: 'center 30%',
+        dim: true,
+      },
       title: 'Cuenta atrás',
       counters: [
         { label: 'Sales de España', target: 'departureAt', doneText: '¡En camino!' },
         { label: 'Se activa el juego', target: 'unlockAt', doneText: '¡Ya!' },
       ],
       note: 'El juego se activa el 1 de diciembre a las 9:30, hora de Gold Coast.',
+      track: 'spotify:track:3zEN0ii6s4DHHBpnTp3RP7', // We Are The People · Empire Of The Sun
     },
   ],
 };
