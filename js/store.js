@@ -11,8 +11,8 @@
 //   save(state)       → guarda el estado completo (puede devolver una Promise)
 //   subscribe(onState)→ avisa cuando el estado cambia fuera de esta pestaña;
 //                       devuelve una función para cancelar
-// Hoy solo existe el de localStorage. Para sincronizar con Supabase u otro
-// servicio basta con escribir otro adaptador y pasarlo en `adapters` (app.js).
+// Hay dos: localStorage (aquí) y Supabase (sync.js). El primero de la lista
+// `adapters` (app.js) debe ser el local: se carga antes para pintar al instante.
 
 const EMPTY = () => ({ version: 1, cells: {} });
 
@@ -77,13 +77,16 @@ export function createStore({ ids, alwaysDone = [], adapters }) {
   let state = EMPTY();
 
   const emit = () => listeners.forEach((fn) => fn());
-  const persist = () => adapters.forEach((adapter) => adapter.save(state));
+  const persist = (except) =>
+    adapters.forEach((adapter) => adapter !== except && adapter.save(state));
 
-  // Incorpora un estado que llega de fuera (otra pestaña, otro móvil).
-  function receive(raw) {
+  // Incorpora un estado que llega de fuera (otra pestaña, otro móvil) y lo
+  // guarda en el resto de adaptadores.
+  function receive(raw, source) {
     const merged = mergeStates(state, sanitize(raw));
     if (JSON.stringify(merged) === JSON.stringify(state)) return;
     state = merged;
+    persist(source);
     emit();
   }
 
@@ -96,12 +99,23 @@ export function createStore({ ids, alwaysDone = [], adapters }) {
 
   return {
     async init() {
+      // Primero lo guardado en este dispositivo, para pintar al instante.
       for (const adapter of adapters) {
-        state = mergeStates(state, sanitize(await adapter.load()));
-        adapter.subscribe?.(receive);
+        adapter.subscribe?.((raw) => receive(raw, adapter));
       }
+      const [local, ...rest] = adapters;
+      state = mergeStates(state, sanitize(await local.load()));
+      emit();
+      // Después los remotos; al terminar, todos reciben el estado fusionado.
+      for (const adapter of rest) {
+        state = mergeStates(state, sanitize(await adapter.load()));
+      }
+      persist();
       emit();
     },
+    // Vuelve a enviar el estado a todos los adaptadores (p. ej. al activar la
+    // sincronización).
+    flush: () => persist(),
     isDone: (id) => locked.has(id) || Boolean(state.cells[id]?.done),
     isLocked: (id) => locked.has(id),
     toggle(id) {

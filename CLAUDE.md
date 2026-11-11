@@ -1,6 +1,6 @@
 # Aussie Bingo · Meso
 
-Bingo del road trip por Australia (30 nov – 18 dic 2026). Web estática, mobile-first, sin framework, sin dependencias y sin paso de build. Se despliega en Vercel desde `main`.
+Bingo del road trip por Australia (30 nov – 18 dic 2026). Web estática, mobile-first, sin framework, sin dependencias y sin paso de build. El progreso se guarda en localStorage y, opcionalmente, se sincroniza entre móviles con Supabase. Se despliega en Vercel desde `main`.
 
 ## Estructura
 
@@ -8,8 +8,11 @@ Bingo del road trip por Australia (30 nov – 18 dic 2026). Web estática, mobil
 index.html          Esqueleto: cabecera, pestañas, paneles y diálogos (vacíos; los rellena app.js)
 css/styles.css      Todos los estilos. Mobile-first; breakpoints en 360, 480, 720 y 900 px (texto completo de casilla desde 900 px)
 js/data.js          TODO el contenido: cabecera, intro, etapas, casillas, instrucciones, premios
-js/store.js         Estado del cartón + adaptadores de guardado (hoy: localStorage)
-js/app.js           Pintado, ficha de casilla, líneas, avisos, reinicio, pestañas
+js/store.js         Estado del cartón, fusión de estados y adaptador de localStorage
+js/sync.js          Adaptador de Supabase (sincronización entre móviles)
+js/config.js        URL y clave pública del proyecto de Supabase
+js/app.js           Pintado, ficha de casilla, líneas, avisos, reinicio, sincronización, pestañas
+supabase/schema.sql Tabla y función del proyecto de Supabase (referencia; ya aplicado)
 assets/             PDF original (botón «Descargar PDF»)
 vercel.json         cleanUrls + cabecera X-Robots-Tag: noindex
 ```
@@ -39,15 +42,21 @@ La casilla `secreto` se queda como `???` con el texto «No preguntes. Lo sabrás
 - Al completar una línea nueva: aviso de línea. Al completar el cartón: diálogo de cartón lleno.
 - Reinicio con doble confirmación en un `<dialog>` propio. No usar `alert` / `confirm`.
 
-## Guardado y sincronización futura
+## Guardado y sincronización
 
 `store.js` separa el estado de dónde se guarda:
 
 - Estado: `{ version: 1, cells: { [id]: { done, at } } }`. `at` es la fecha del último cambio.
 - `mergeStates(a, b)` fusiona dos copias quedándose, casilla a casilla, con el cambio más reciente. Reiniciar escribe `done: false` con fecha nueva (no borra), para que también se propague.
-- Un adaptador es `{ load(), save(state), subscribe(onState) }`; `load` y `save` pueden ser asíncronos.
+- Un adaptador es `{ load(), save(state), subscribe(onState) }`. Hay dos, en este orden: localStorage (siempre) y Supabase (`sync.js`).
 
-Para sincronizar dos móviles (p. ej. Supabase): escribe `createSupabaseAdapter()` con esa forma (una fila por cartón con el estado en JSON, o una fila por casilla; `subscribe` con Realtime) y añádelo a `adapters` en `app.js`, detrás del de localStorage. No hay que tocar el pintado.
+Sincronización entre móviles (Supabase):
+
+- Está apagada hasta que alguien pulsa «Sincronizar móviles → Activar». Eso genera un código secreto aleatorio y un enlace `…/#sync=CÓDIGO`. Al abrirlo en el otro móvil y aceptar, los dos comparten cartón. El código se guarda en localStorage (`aussie-bingo-meso:sync`).
+- No hay cuentas ni Realtime. Cada sincronización es una llamada a la función `sync_card(p_code, p_cells)`, que fusiona en el servidor y devuelve el resultado. Se llama al cargar, al marcar, al volver a la pestaña, al recuperar conexión y cada 15 s con la web visible. Sin conexión se sigue jugando en local y se fusiona después.
+- Seguridad: la clave de `config.js` es la pública («publishable»). La tabla `cards` tiene RLS sin políticas, así que no se puede leer ni escribir directamente; solo a través de `sync_card`, y solo quien conoce el código de un cartón puede verlo o cambiarlo. En la base de datos se guarda el hash del código, no el código.
+- Si cambias la función o la tabla, hazlo con una migración en Supabase y actualiza `supabase/schema.sql`.
+- Nunca pongas en el repo la clave `service_role` ni la contraseña de la base de datos.
 
 ## Diseño
 

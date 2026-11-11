@@ -82,6 +82,10 @@
         <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 19h14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Descargar PDF
       </a>
+      <button class="btn btn--outline" id="sync-open" type="button" hidden>
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 12a8 8 0 0 1 13.7-5.6L20 8.5M20 4v4.5h-4.5M20 12a8 8 0 0 1-13.7 5.6L4 15.5M4 20v-4.5h4.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span id="sync-open-label"></span>
+      </button>
       <button class="btn btn--ghost" id="reset-open" type="button">Reiniciar cartón</button>
     </div>
   </main>
@@ -110,6 +114,21 @@
       <div class="modal__actions">
         <button class="btn btn--outline" id="reset-cancel" type="button">Cancelar</button>
         <button class="btn btn--danger" id="reset-confirm" type="button"></button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Sincronización entre móviles -->
+  <dialog class="modal" id="sync-dialog" aria-labelledby="sync-title">
+    <div class="modal__body">
+      <h2 class="modal__title" id="sync-title"></h2>
+      <p id="sync-text"></p>
+      <input class="sync-link" id="sync-link" type="text" readonly aria-label="Enlace para el otro móvil" hidden>
+      <p class="sync-status" id="sync-status" role="status"></p>
+      <div class="modal__actions">
+        <button class="btn btn--outline" id="sync-secondary" type="button"></button>
+        <button class="btn btn--primary" id="sync-primary" type="button"></button>
+        <button class="btn btn--ghost btn--block" id="sync-off" type="button" hidden>Desactivar en este móvil</button>
       </div>
     </div>
   </dialog>

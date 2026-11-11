@@ -783,6 +783,31 @@ dialog::backdrop {
   grid-column: 1 / -1;
 }
 
+.sync-link {
+  width: 100%;
+  min-height: 44px;
+  margin-top: 14px;
+  padding: 8px 12px;
+  border: 2px solid var(--green);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  font-size: 16px;
+}
+
+.sync-status {
+  min-height: 1.45em;
+  margin-top: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--green);
+}
+
+.sync-status[data-status='error'] {
+  color: var(--danger);
+}
+
 .modal--win {
   background: var(--gold);
   border-top-color: var(--green);

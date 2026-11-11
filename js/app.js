@@ -1,9 +1,12 @@
 import { TRIP, GRID, STAGES, PRIZES, CELLS } from './data.js';
 import { createStore, createLocalAdapter } from './store.js';
+import { createSupabaseAdapter, createCode, isValidCode } from './sync.js';
+import { SUPABASE } from './config.js';
 
 const STORAGE_KEY = 'aussie-bingo-meso:v1';
 
 const INTRO_KEY = 'aussie-bingo-meso:intro';
+const SYNC_CODE_KEY = 'aussie-bingo-meso:sync';
 
 // Preferencias de este dispositivo (no forman parte del progreso).
 const readFlag = (key) => {
@@ -36,12 +39,13 @@ const byId = new Map(CELLS.map((cell) => [cell.id, cell]));
 const stageTitle = new Map(STAGES.map((stage) => [stage.id, stage.title]));
 const prize = (id) => PRIZES.find((p) => p.id === id);
 
-// Para añadir sincronización (p. ej. Supabase): crea otro adaptador con la
-// misma forma que createLocalAdapter y añádelo a esta lista. Ver store.js.
+// Sincronización entre móviles (inactiva hasta que se activa desde la web).
+const remote = createSupabaseAdapter({ ...SUPABASE, codeKey: SYNC_CODE_KEY });
+
 const store = createStore({
   ids: CELLS.map((cell) => cell.id),
   alwaysDone: CELLS.filter((cell) => cell.kind === 'free').map((cell) => cell.id),
-  adapters: [createLocalAdapter(STORAGE_KEY)],
+  adapters: [createLocalAdapter(STORAGE_KEY), remote],
 });
 
 // ── Líneas: filas y columnas completas ──────────────────────────────────────
@@ -262,6 +266,7 @@ const RESET_STEPS = [
   {
     title: '¿Reiniciar el cartón?',
     text: 'Se desmarcarán todas las casillas.',
+    textSynced: 'Se desmarcarán todas las casillas, también en el otro móvil.',
     confirm: 'Sí, reiniciar',
   },
   {
@@ -275,7 +280,8 @@ let resetStep = 0;
 function showResetStep(step) {
   resetStep = step;
   $('reset-title').textContent = RESET_STEPS[step].title;
-  $('reset-text').textContent = RESET_STEPS[step].text;
+  const { text, textSynced } = RESET_STEPS[step];
+  $('reset-text').textContent = (remote.getCode() && textSynced) || text;
   $('reset-confirm').textContent = RESET_STEPS[step].confirm;
   $('reset-cancel').focus();
 }
@@ -294,6 +300,117 @@ $('reset-confirm').addEventListener('click', () => {
   resetDialog.close();
   showToast('Cartón reiniciado');
 });
+
+// ── Sincronización entre móviles ────────────────────────────────────────────
+const syncDialog = $('sync-dialog');
+const SYNC_STATUS = {
+  off: '',
+  syncing: 'Sincronizando…',
+  ok: 'Sincronizado',
+  error: 'Sin conexión. Se sincronizará al recuperarla.',
+};
+let pendingCode = null; // código de un enlace recibido, a la espera de confirmar
+
+const shareLink = () => `${location.origin}${location.pathname}#sync=${remote.getCode()}`;
+
+function renderSync() {
+  const on = Boolean(remote.getCode());
+  const joining = Boolean(pendingCode);
+  $('sync-open-label').textContent = on ? 'Sincronización activada' : 'Sincronizar móviles';
+
+  $('sync-title').textContent = joining
+    ? '¿Unirte al cartón compartido?'
+    : on
+      ? 'Sincronización activada'
+      : 'Sincronizar móviles';
+  $('sync-text').textContent = joining
+    ? 'Lo que haya marcado en este móvil se juntará con el cartón compartido.'
+    : on
+      ? 'Abre este enlace en el otro móvil. A partir de ahí, lo que marque uno lo verá el otro.'
+      : 'Comparte el cartón entre dos móviles: lo que marque uno lo verá el otro. Se crea un enlace privado para abrir en el otro móvil.';
+
+  const link = $('sync-link');
+  link.hidden = !on || joining;
+  link.value = on ? shareLink() : '';
+
+  const status = on && !joining ? remote.getStatus() : 'off';
+  $('sync-status').textContent = SYNC_STATUS[status];
+  $('sync-status').dataset.status = status;
+
+  $('sync-primary').textContent = joining ? 'Unirme' : on ? 'Compartir enlace' : 'Activar';
+  $('sync-secondary').textContent = joining ? 'Cancelar' : 'Cerrar';
+  $('sync-off').hidden = !on || joining;
+}
+
+function activateSync(code) {
+  remote.setCode(code);
+  store.flush();
+  renderSync();
+}
+
+async function shareSyncLink() {
+  const url = shareLink();
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: TRIP.title, text: 'Cartón compartido', url });
+    } catch {
+      /* compartir cancelado */
+    }
+    return;
+  }
+  const button = $('sync-primary');
+  try {
+    await navigator.clipboard.writeText(url);
+    button.textContent = '¡Enlace copiado!';
+  } catch {
+    $('sync-link').select();
+    button.textContent = 'Copia el enlace de arriba';
+  }
+  setTimeout(renderSync, 2200);
+}
+
+// Enlace recibido: …/#sync=CÓDIGO. Se quita de la barra y se pide confirmar.
+function checkJoinLink() {
+  const match = location.hash.match(/^#sync=(.+)$/);
+  if (!match) return;
+  history.replaceState(null, '', location.pathname + location.search);
+  if (!remote.available || !isValidCode(match[1]) || match[1] === remote.getCode()) return;
+  pendingCode = match[1];
+  renderSync();
+  if (!syncDialog.open) syncDialog.showModal();
+}
+
+if (remote.available) {
+  $('sync-open').hidden = false;
+  remote.onStatus(renderSync);
+  $('sync-open').addEventListener('click', () => {
+    renderSync();
+    syncDialog.showModal();
+  });
+  $('sync-primary').addEventListener('click', () => {
+    if (pendingCode) {
+      const code = pendingCode;
+      pendingCode = null;
+      activateSync(code);
+      syncDialog.close();
+      showToast('Cartón compartido conectado');
+    } else if (remote.getCode()) {
+      shareSyncLink();
+    } else {
+      activateSync(createCode());
+    }
+  });
+  $('sync-secondary').addEventListener('click', () => syncDialog.close());
+  $('sync-off').addEventListener('click', () => {
+    remote.setCode(null);
+    renderSync();
+  });
+  syncDialog.addEventListener('close', () => {
+    pendingCode = null;
+  });
+  window.addEventListener('hashchange', checkJoinLink);
+  renderSync();
+}
 
 // ── Pestañas ────────────────────────────────────────────────────────────────
 const tabs = [...document.querySelectorAll('[role="tab"]')];
@@ -324,3 +441,4 @@ tabs.forEach((tab, index) => {
 renderStatic();
 store.subscribe(update);
 store.init();
+checkJoinLink();
