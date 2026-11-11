@@ -374,6 +374,28 @@
   border-width: 4px;
 }
 
+.pl-flag {
+  display: block;
+  width: 112px;
+  margin-bottom: 22px;
+  rotate: -5deg;
+}
+
+.pl-flag--small {
+  width: 72px;
+  margin-bottom: 14px;
+}
+
+.pl-flag svg {
+  display: block;
+  width: 100%;
+  border: 3px solid #fff;
+  border-radius: 6px;
+  box-shadow: 0 10px 24px rgb(0 0 0 / 0.35);
+  transform-origin: left center;
+  animation: pl-wave 2.6s ease-in-out infinite alternate;
+}
+
 .pl-button {
   display: block;
   min-height: 52px;
@@ -490,6 +512,15 @@
   }
 }
 
+@keyframes pl-wave {
+  from {
+    transform: perspective(300px) rotateY(-14deg) skewY(-3deg);
+  }
+  to {
+    transform: perspective(300px) rotateY(14deg) skewY(3deg);
+  }
+}
+
 @keyframes pl-pump {
   to {
     transform: scale(1.08) rotate(-2deg);
@@ -516,6 +547,7 @@
 @media (prefers-reduced-motion: reduce) {
   .pl-bg::before,
   .pl-bg::after,
+  .pl-flag svg,
   .pl-huge,
   .pl-loader span,
   .pl-in,

@@ -40,6 +40,50 @@ function timeLeft(target) {
   };
 }
 
+// ── Bandera de Australia (SVG, proporciones oficiales) ──────────────────────
+let flagCount = 0;
+function star(cx, cy, radius, points) {
+  const coords = [];
+  for (let i = 0; i < points * 2; i++) {
+    const r = i % 2 ? radius * (4 / 9) : radius;
+    const angle = (Math.PI * i) / points - Math.PI / 2;
+    coords.push(`${(cx + r * Math.cos(angle)).toFixed(1)},${(cy + r * Math.sin(angle)).toFixed(1)}`);
+  }
+  return `<polygon points="${coords.join(' ')}"/>`;
+}
+
+function createFlag(extraClass = '') {
+  const id = `pl-flag-${++flagCount}`;
+  const wrap = el('span', `pl-flag ${extraClass}`.trim());
+  wrap.setAttribute('role', 'img');
+  wrap.setAttribute('aria-label', 'Bandera de Australia');
+  wrap.innerHTML = `
+    <svg viewBox="0 0 10080 5040" aria-hidden="true">
+      <defs>
+        <clipPath id="${id}-a"><path d="M0,0v30h60v-30z"/></clipPath>
+        <clipPath id="${id}-b"><path d="M30,15h30v15zv15h-30zh-30v-15zv-15h30z"/></clipPath>
+      </defs>
+      <rect width="10080" height="5040" fill="#012169"/>
+      <svg width="5040" height="2520" viewBox="0 0 60 30">
+        <g clip-path="url(#${id}-a)">
+          <path d="M0,0L60,30M60,0L0,30" stroke="#fff" stroke-width="6"/>
+          <path d="M0,0L60,30M60,0L0,30" clip-path="url(#${id}-b)" stroke="#C8102E" stroke-width="4"/>
+          <path d="M30,0v30M0,15h60" stroke="#fff" stroke-width="10"/>
+          <path d="M30,0v30M0,15h60" stroke="#C8102E" stroke-width="6"/>
+        </g>
+      </svg>
+      <g fill="#fff">
+        ${star(2520, 3780, 756, 7)}
+        ${star(7560, 4200, 360, 7)}
+        ${star(6300, 2205, 360, 7)}
+        ${star(7560, 840, 360, 7)}
+        ${star(8680, 1869, 360, 7)}
+        ${star(8064, 2730, 210, 5)}
+      </g>
+    </svg>`;
+  return wrap;
+}
+
 // ── Contenido de cada tipo de diapositiva ───────────────────────────────────
 // Cada función devuelve los nodos y, si hace falta, un `tick` que se llama
 // cada segundo.
@@ -52,6 +96,7 @@ const BUILDERS = {
       img.alt = PRELAUNCH.photoAlt ?? '';
       nodes.push(img);
     }
+    if (slide.flag) nodes.push(createFlag());
     if (slide.kicker) nodes.push(el('p', 'pl-kicker', slide.kicker));
     nodes.push(el('h2', 'pl-title', slide.title), el('p', 'pl-lead', slide.text));
     return { nodes };
@@ -103,7 +148,9 @@ const BUILDERS = {
   },
 
   big(slide) {
-    return { nodes: [el('p', 'pl-kicker pl-kicker--big', slide.title), el('p', 'pl-huge', slide.big)] };
+    const nodes = [el('p', 'pl-kicker pl-kicker--big', slide.title), el('p', 'pl-huge', slide.big)];
+    if (slide.flag) nodes.unshift(createFlag());
+    return { nodes };
   },
 
   final(slide, targets) {
@@ -114,6 +161,7 @@ const BUILDERS = {
       img.alt = PRELAUNCH.photoAlt ?? '';
       nodes.push(img);
     }
+    if (slide.flag) nodes.push(createFlag('pl-flag--small'));
     nodes.push(el('h2', 'pl-title pl-title--mid', slide.title));
     const ticks = [];
     for (const counter of slide.counters) {
@@ -225,6 +273,7 @@ export function initPrelaunch({ onUnlock }) {
   const skipButton = el('button', 'pl-button pl-button--ghost', PRELAUNCH.start.skip);
   skipButton.type = 'button';
   skipButton.hidden = !flag.get();
+  if (PRELAUNCH.start.flag) startBody.append(createFlag());
   startBody.append(
     el('p', 'pl-kicker', PRELAUNCH.start.kicker),
     el('h1', 'pl-title pl-title--mid', PRELAUNCH.start.title),

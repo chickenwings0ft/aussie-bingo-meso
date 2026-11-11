@@ -354,7 +354,10 @@ export const PRELAUNCH = {
   photo: '', // ruta de la foto (p. ej. 'assets/nosotros.jpg'); '' = sin foto
   photoAlt: 'Meso y Luk',
 
+  // flag: true pinta la bandera de Australia (vale en start y en las
+  // diapositivas title, big y final).
   start: {
+    flag: true,
     kicker: 'Meso Road Trip 2026',
     title: 'Tienes un mensaje',
     button: 'Empezar',
@@ -369,6 +372,7 @@ export const PRELAUNCH = {
     {
       type: 'title',
       theme: 'green',
+      flag: true,
       kicker: 'Meso Road Trip 2026',
       title: 'Hello Mesonada',
       text: 'Bienvenido al viaje de tu vida.',
@@ -427,6 +431,7 @@ export const PRELAUNCH = {
     {
       type: 'big',
       theme: 'green',
+      flag: true,
       title: 'Engorile',
       big: 'x1.000',
       seconds: 5,
@@ -435,6 +440,7 @@ export const PRELAUNCH = {
       // Última diapositiva: se queda fija con los dos contadores.
       type: 'final',
       theme: 'ink',
+      flag: true,
       title: 'Cuenta atrás',
       counters: [
         { label: 'Sales de España', target: 'departureAt', doneText: '¡En camino!' },
