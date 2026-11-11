@@ -333,19 +333,36 @@ function mountSpotify(container, firstUri) {
     });
   };
 
-  const script = el('script');
-  script.src = 'https://open.spotify.com/embed/iframe-api/v1';
-  script.async = true;
-  script.onerror = () => {
-    // Sin API: reproductor normal (no cambia de canción solo).
-    const [, kind, id] = firstUri.split(':');
-    const frame = el('iframe');
-    frame.src = `https://open.spotify.com/embed/${kind}/${id}?theme=0`;
+  // Plan B si la API de Spotify no carga: reproductor normal, al que se le
+  // cambia la canción en cada diapositiva (aunque no puede ponerla sola).
+  let frame = null;
+  const embedUrl = (uri) => {
+    const [, kind, id] = uri.split(':');
+    return `https://open.spotify.com/embed/${kind}/${id}?theme=0`;
+  };
+  const useFallback = () => {
+    if (controller || frame) return;
+    slot.remove();
+    frame = el('iframe');
+    frame.src = embedUrl(wanted);
     frame.title = 'Reproductor de Spotify';
     frame.allow = 'autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture';
     container.append(frame);
   };
-  document.head.append(script);
+
+  // La API se intenta cargar dos veces antes de pasar al plan B.
+  const loadApi = (attempt = 1) => {
+    const script = el('script');
+    script.src = `https://open.spotify.com/embed/iframe-api/v1${attempt > 1 ? `?retry=${Date.now()}` : ''}`;
+    script.async = true;
+    script.onerror = () => {
+      script.remove();
+      if (attempt < 2) setTimeout(() => loadApi(attempt + 1), 800);
+      else useFallback();
+    };
+    document.head.append(script);
+  };
+  loadApi();
 
   return {
     // Primer toque de la persona: enciende la música.
@@ -362,7 +379,8 @@ function mountSpotify(container, firstUri) {
     setTrack(uri) {
       if (!uri || uri === wanted) return;
       wanted = uri;
-      load(uri);
+      if (frame) frame.src = embedUrl(uri);
+      else load(uri);
     },
   };
 }
