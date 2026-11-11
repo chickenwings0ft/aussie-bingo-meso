@@ -779,6 +779,10 @@ dialog::backdrop {
   margin-top: 20px;
 }
 
+.modal__actions .btn {
+  padding-inline: 10px;
+}
+
 .modal__actions .btn--block {
   grid-column: 1 / -1;
 }
