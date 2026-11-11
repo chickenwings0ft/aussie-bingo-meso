@@ -316,6 +316,8 @@ export function initPrelaunch({ onUnlock }) {
     start.hidden = true;
     sections.forEach((section, i) => {
       section.hidden = i !== index;
+      section.style.transform = '';
+      section.style.transition = '';
     });
     [...bars.children].forEach((bar, i) => {
       bar.className = `pl-bar${i < index || index === last ? ' is-done' : i === index ? ' is-active' : ''}`;
@@ -332,8 +334,58 @@ export function initPrelaunch({ onUnlock }) {
   });
   skipButton.addEventListener('click', () => go(last));
   replay.addEventListener('click', () => go(0));
-  next.addEventListener('click', () => index < last && go(index + 1));
-  prev.addEventListener('click', () => index > 0 && go(index - 1));
+  // Tras deslizar, el navegador también lanza un «click» del mismo gesto:
+  // ese se ignora. El siguiente toque vuelve a contar.
+  let swiped = false;
+  const onNav = (step) => () => {
+    if (swiped) {
+      swiped = false;
+      return;
+    }
+    const to = index + step;
+    if (to >= 0 && to <= last) go(to);
+  };
+  next.addEventListener('click', onNav(1));
+  prev.addEventListener('click', onNav(-1));
+
+  // Deslizar: hacia la izquierda = siguiente, hacia la derecha = anterior.
+  // La diapositiva sigue un poco al dedo mientras se arrastra.
+  const SWIPE_MIN = 45;
+  let drag = null;
+  const current = () => sections[index];
+  stage.addEventListener('pointerdown', (event) => {
+    swiped = false;
+    if (index < 0 || !event.isPrimary || event.target.closest('.pl-music, button:not(.pl-nav)')) return;
+    drag = { x: event.clientX, y: event.clientY, dx: 0, horizontal: null };
+  });
+  stage.addEventListener('pointermove', (event) => {
+    if (!drag) return;
+    drag.dx = event.clientX - drag.x;
+    const dy = event.clientY - drag.y;
+    if (drag.horizontal === null && Math.hypot(drag.dx, dy) > 8) {
+      drag.horizontal = Math.abs(drag.dx) > Math.abs(dy);
+    }
+    if (!drag.horizontal) return;
+    // Resistencia en los extremos (antes de la primera y después de la última).
+    const edge = (drag.dx > 0 && index === 0) || (drag.dx < 0 && index === last);
+    const section = current();
+    section.style.transition = 'none';
+    section.style.transform = `translateX(${drag.dx * (edge ? 0.12 : 0.35)}px)`;
+  });
+  const endDrag = (event) => {
+    if (!drag) return;
+    const { dx, horizontal } = drag;
+    drag = null;
+    const section = current();
+    section.style.transition = 'transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)';
+    section.style.transform = '';
+    if (event.type === 'pointercancel' || !horizontal || Math.abs(dx) < SWIPE_MIN) return;
+    swiped = true;
+    if (dx < 0 && index < last) go(index + 1);
+    else if (dx > 0 && index > 0) go(index - 1);
+  };
+  stage.addEventListener('pointerup', endDrag);
+  stage.addEventListener('pointercancel', endDrag);
   document.addEventListener('keydown', onKey);
   function onKey(event) {
     if (index < 0) return;

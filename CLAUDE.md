@@ -40,7 +40,7 @@ La casilla `secreto` se queda como `???` con el texto «No preguntes. Lo sabrás
 
 ## Intro previa al viaje
 
-Hasta `PRELAUNCH.unlockAt` (1 dic 2026, 9:30 en Gold Coast) la web solo enseña la intro: una pantalla de inicio, diapositivas que avanzan solas (tocar a la derecha = siguiente, a la izquierda = anterior, mantener pulsado = pausa) y una última diapositiva fija con dos contadores. Al llegar la hora, la intro desaparece sola y se ve el bingo.
+Hasta `PRELAUNCH.unlockAt` (1 dic 2026, 9:30 en Gold Coast) la web solo enseña la intro: una pantalla de inicio, diapositivas que avanzan solas (deslizar o tocar a la derecha = siguiente, a la izquierda = anterior, mantener pulsado = pausa) y una última diapositiva fija con dos contadores. Al llegar la hora, la intro desaparece sola y se ve el bingo.
 
 Todo se edita en `PRELAUNCH`, en `js/data.js`:
 
