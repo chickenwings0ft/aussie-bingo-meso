@@ -355,6 +355,7 @@ export const CELLS = [
 //   track       canción que suena en esa diapositiva ('spotify:track:ID')
 //   background  foto a pantalla completa: { src, alt, position, dim }
 //               (dim: true la oscurece para que se lea bien lo de encima)
+//   sticker     foto recortada con fondo transparente (solo en big): { src, alt }
 //   shot        foto entera enmarcada (solo en loading): { src, alt, rec }
 //               (rec: true le pone el «● REC» de cámara grabando)
 //   flag        true = bandera de Australia
@@ -367,6 +368,11 @@ export const PRELAUNCH = {
   playlist: 'https://open.spotify.com/playlist/0n9paMm83sdgSX4pSfzkbb', // de aquí salen las canciones
 
   start: {
+    // Portada: la misma foto recortada, como pegatina.
+    sticker: {
+      src: 'assets/fotos/meso-luk.webp',
+      alt: 'Los dos con sombrero, camisa abierta y una XXXX Gold en la mano',
+    },
     flag: true,
     critters: ['koala-hang'],
     track: 'spotify:track:2ctvdKmETyOzPb2GiJJT53', // Breathe (In the Air) · Pink Floyd
@@ -469,6 +475,11 @@ export const PRELAUNCH = {
       critters: ['rain'],
       title: 'Engorile',
       big: 'x1.000',
+      // Foto recortada (PNG con fondo transparente) que entra como pegatina.
+      sticker: {
+        src: 'assets/fotos/meso-luk.webp',
+        alt: 'Los dos con sombrero, camisa abierta y una XXXX Gold en la mano',
+      },
       seconds: 7,
       track: 'spotify:track:2zYzyRzz6pRmhPzyfMEC8s', // Highway to Hell · AC/DC
     },

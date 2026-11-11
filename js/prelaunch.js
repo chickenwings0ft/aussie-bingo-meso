@@ -41,47 +41,15 @@ function timeLeft(target) {
   };
 }
 
-// ── Bandera de Australia (SVG, proporciones oficiales) ──────────────────────
-let flagCount = 0;
-function star(cx, cy, radius, points) {
-  const coords = [];
-  for (let i = 0; i < points * 2; i++) {
-    const r = i % 2 ? radius * (4 / 9) : radius;
-    const angle = (Math.PI * i) / points - Math.PI / 2;
-    coords.push(`${(cx + r * Math.cos(angle)).toFixed(1)},${(cy + r * Math.sin(angle)).toFixed(1)}`);
-  }
-  return `<polygon points="${coords.join(' ')}"/>`;
-}
-
+// ── Bandera de Australia (assets/bandera-australia.svg) ─────────────────────
 function createFlag(extraClass = '') {
-  const id = `pl-flag-${++flagCount}`;
   const wrap = el('span', `pl-flag ${extraClass}`.trim());
-  wrap.setAttribute('role', 'img');
-  wrap.setAttribute('aria-label', 'Bandera de Australia');
-  wrap.innerHTML = `
-    <svg viewBox="0 0 10080 5040" aria-hidden="true">
-      <defs>
-        <clipPath id="${id}-a"><path d="M0,0v30h60v-30z"/></clipPath>
-        <clipPath id="${id}-b"><path d="M30,15h30v15zv15h-30zh-30v-15zv-15h30z"/></clipPath>
-      </defs>
-      <rect width="10080" height="5040" fill="#012169"/>
-      <svg width="5040" height="2520" viewBox="0 0 60 30">
-        <g clip-path="url(#${id}-a)">
-          <path d="M0,0L60,30M60,0L0,30" stroke="#fff" stroke-width="6"/>
-          <path d="M0,0L60,30M60,0L0,30" clip-path="url(#${id}-b)" stroke="#C8102E" stroke-width="4"/>
-          <path d="M30,0v30M0,15h60" stroke="#fff" stroke-width="10"/>
-          <path d="M30,0v30M0,15h60" stroke="#C8102E" stroke-width="6"/>
-        </g>
-      </svg>
-      <g fill="#fff">
-        ${star(2520, 3780, 756, 7)}
-        ${star(7560, 4200, 360, 7)}
-        ${star(6300, 2205, 360, 7)}
-        ${star(7560, 840, 360, 7)}
-        ${star(8680, 1869, 360, 7)}
-        ${star(8064, 2730, 210, 5)}
-      </g>
-    </svg>`;
+  const img = el('img');
+  img.src = 'assets/bandera-australia.svg';
+  img.alt = 'Bandera de Australia';
+  img.width = 1280;
+  img.height = 640;
+  wrap.append(img);
   return wrap;
 }
 
@@ -238,6 +206,13 @@ const BUILDERS = {
   big(slide) {
     const nodes = [el('p', 'pl-kicker pl-kicker--big', slide.title), el('p', 'pl-huge', slide.big)];
     if (slide.flag) nodes.unshift(createFlag());
+    if (slide.sticker?.src) {
+      const img = el('img', 'pl-sticker');
+      img.src = slide.sticker.src;
+      img.alt = slide.sticker.alt ?? '';
+      img.decoding = 'async';
+      nodes.push(img);
+    }
     return { nodes };
   },
 
@@ -438,7 +413,15 @@ export function initPrelaunch({ onUnlock }) {
   const skipButton = el('button', 'pl-button pl-button--ghost', intro.skip);
   skipButton.type = 'button';
   skipButton.hidden = !flag.get();
-  if (intro.flag) startBody.append(createFlag());
+  if (intro.sticker?.src) {
+    const img = el('img', 'pl-sticker pl-sticker--cover');
+    img.src = intro.sticker.src;
+    img.alt = intro.sticker.alt ?? '';
+    img.decoding = 'async';
+    img.fetchPriority = 'high';
+    startBody.append(img);
+  }
+  if (intro.flag) startBody.append(createFlag('pl-flag--small'));
   startBody.append(
     el('p', 'pl-kicker', intro.kicker),
     el('h1', 'pl-title pl-title--mid pl-title--glow', intro.title),
