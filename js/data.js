@@ -355,7 +355,7 @@ export const CELLS = [
 //   track       canción que suena en esa diapositiva ('spotify:track:ID')
 //   background  foto a pantalla completa: { src, alt, position, dim }
 //               (dim: true la oscurece para que se lea bien lo de encima)
-//   sticker     foto recortada con fondo transparente (en big y text): { src, alt, effect }
+//   sticker     foto recortada con fondo transparente (en big, text y loading): { src, alt, effect }
 //               (effect: 'crash' = entra de golpe con sacudida y 💥)
 //   shot        foto entera enmarcada (solo en loading): { src, alt, rec }
 //               (rec: true le pone el «● REC» de cámara grabando)
@@ -450,7 +450,11 @@ export const PRELAUNCH = {
       type: 'loading',
       theme: 'gold',
       critters: ['koala-hang'],
-      title: 'Tienda de campaña',
+      sticker: {
+        src: 'assets/fotos/rooftop-tent.webp',
+        alt: 'Tienda de techo abierta encima de un todoterreno blanco',
+      },
+      title: 'Rooftop tent',
       done: false,
       loadingText: 'Loading…',
       doneText: 'Completado',

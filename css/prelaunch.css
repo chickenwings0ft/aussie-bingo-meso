@@ -761,6 +761,21 @@
   font-size: clamp(80px, 25vw, 128px);
 }
 
+/* Pegatina de producto encima de la barra de carga */
+.pl-sticker--product {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  max-height: min(38vh, 340px);
+  margin: 0 auto 18px;
+}
+
+@media (max-height: 700px) {
+  .pl-sticker--product {
+    max-height: 30vh;
+  }
+}
+
 /* Pegatina bajo un texto largo */
 .pl-sticker--story {
   height: min(30vh, 280px);

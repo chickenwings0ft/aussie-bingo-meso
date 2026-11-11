@@ -198,6 +198,7 @@ const BUILDERS = {
       }
       nodes.push(frame);
     }
+    if (slide.sticker?.src) nodes.push(createSticker(slide.sticker, 'pl-sticker--product'));
     const bar = el('div', `pl-loader${slide.done ? ' is-done' : ''}`);
     bar.append(el('span'));
     const status = el('p', 'pl-status', slide.done ? slide.doneText : slide.loadingText);
