@@ -350,7 +350,9 @@ export const CELLS = [
 export const PRELAUNCH = {
   unlockAt: '2026-12-01T09:30:00+10:00', // 1 dic, 9:30 en Gold Coast (Queensland, UTC+10)
   departureAt: '2026-11-28T12:00:00+01:00', // sábado 28 nov, hora de España (hora provisional)
-  spotifyTrack: '0inB67IHflRVtb2pmnykz8', // id de la canción en Spotify; '' = sin música
+  // Música: URI de Spotify (playlist, álbum o canción); '' = sin música.
+  // Sale de un enlace open.spotify.com/playlist/ID → 'spotify:playlist:ID'.
+  spotify: 'spotify:playlist:0n9paMm83sdgSX4pSfzkbb',
   photo: '', // ruta de la foto (p. ej. 'assets/nosotros.jpg'); '' = sin foto
   photoAlt: 'Meso y Luk',
 

@@ -48,7 +48,7 @@ Todo se edita en `PRELAUNCH`, en `js/data.js`:
 - **Marcar algo como conseguido**: en la diapositiva `loading` correspondiente (GoPro, tienda de campaña) pon `done: true`. En la de `progress` (planazos pagados) sube `done`.
 - **Textos y orden**: array `slides`. Tipos disponibles: `title`, `text`, `hours`, `loading`, `progress`, `big`, `final`. `theme` es `green`, `gold`, `ink` o `paper`; `seconds` es lo que dura en pantalla.
 - **Foto**: guarda la imagen en `assets/` y pon su ruta en `photo`. Sale en la primera diapositiva y en la última.
-- **Música**: `spotifyTrack` es el id de la canción en Spotify; se incrusta el reproductor oficial. No subas archivos de música con copyright al repo: es público.
+- **Música**: `spotify` es la URI de Spotify de una playlist, álbum o canción (`spotify:playlist:ID`); se incrusta el reproductor oficial. No subas archivos de música con copyright al repo: es público.
 
 **Modo árbitro**: abrir la web una vez con `#arbitro` al final de la URL enseña el bingo en ese dispositivo antes de la fecha (para probar y preparar la sincronización). El botón «Ver la intro» lo desactiva.
 

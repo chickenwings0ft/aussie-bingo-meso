@@ -193,12 +193,13 @@ const BUILDERS = {
 };
 
 // ── Música: reproductor oficial de Spotify ──────────────────────────────────
-function mountSpotify(container, trackId) {
+function mountSpotify(container, uri) {
+  const [, kind, id] = uri.split(':');
   let controller = null;
   const fallback = () => {
     if (container.querySelector('iframe')) return;
     const frame = el('iframe');
-    frame.src = `https://open.spotify.com/embed/track/${trackId}?theme=0`;
+    frame.src = `https://open.spotify.com/embed/${kind}/${id}?theme=0`;
     frame.title = 'Reproductor de Spotify';
     frame.allow = 'autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture';
     frame.loading = 'lazy';
@@ -209,7 +210,7 @@ function mountSpotify(container, trackId) {
   window.onSpotifyIframeApiReady = (api) => {
     api.createController(
       slot,
-      { uri: `spotify:track:${trackId}`, width: '100%', height: 80, theme: 'dark' },
+      { uri, width: '100%', height: 80, theme: 'dark' },
       (created) => {
         controller = created;
       },
@@ -280,7 +281,7 @@ export function initPrelaunch({ onUnlock }) {
     startButton,
     skipButton,
   );
-  if (PRELAUNCH.spotifyTrack) startBody.append(el('p', 'pl-note', PRELAUNCH.start.hint));
+  if (PRELAUNCH.spotify) startBody.append(el('p', 'pl-note', PRELAUNCH.start.hint));
   start.append(startBody);
   deck.append(start);
 
@@ -299,10 +300,10 @@ export function initPrelaunch({ onUnlock }) {
   const music = el('div', 'pl-music');
   let player = null;
   stage.append(bars, deck, prev, next);
-  if (PRELAUNCH.spotifyTrack) {
+  if (PRELAUNCH.spotify) {
     stage.append(music);
     stage.classList.add('has-music');
-    player = mountSpotify(music, PRELAUNCH.spotifyTrack);
+    player = mountSpotify(music, PRELAUNCH.spotify);
   }
   root.append(stage);
   root.hidden = false;
