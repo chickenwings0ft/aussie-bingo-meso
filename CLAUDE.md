@@ -8,6 +8,8 @@ Bingo del road trip por Australia (30 nov – 18 dic 2026). Web estática, mobil
 index.html          Esqueleto: cabecera, pestañas, paneles y diálogos (vacíos; los rellena app.js)
 css/styles.css      Todos los estilos. Mobile-first; breakpoints en 360, 480, 720 y 900 px (texto completo de casilla desde 900 px)
 js/data.js          TODO el contenido: cabecera, intro, etapas, casillas, instrucciones, premios
+js/prelaunch.js     Intro previa al viaje: diapositivas, contadores y reproductor de Spotify
+css/prelaunch.css   Estilos de la intro y del bloqueo del bingo
 js/store.js         Estado del cartón, fusión de estados y adaptador de localStorage
 js/sync.js          Adaptador de Supabase (sincronización entre móviles)
 js/config.js        URL y clave pública del proyecto de Supabase
@@ -35,6 +37,22 @@ Solo se toca `js/data.js`.
 ### Casilla secreta
 
 La casilla `secreto` se queda como `???` con el texto «No preguntes. Lo sabrás cuando toque.». El repo y la web son públicos: no escribas qué es en ningún archivo, comentario ni mensaje de commit.
+
+## Intro previa al viaje
+
+Hasta `PRELAUNCH.unlockAt` (1 dic 2026, 9:30 en Gold Coast) la web solo enseña la intro: una pantalla de inicio, diapositivas que avanzan solas (tocar a la derecha = siguiente, a la izquierda = anterior, mantener pulsado = pausa) y una última diapositiva fija con dos contadores. Al llegar la hora, la intro desaparece sola y se ve el bingo.
+
+Todo se edita en `PRELAUNCH`, en `js/data.js`:
+
+- **Fechas**: `unlockAt` (activación del juego) y `departureAt` (salida de España). Llevan su huso horario.
+- **Marcar algo como conseguido**: en la diapositiva `loading` correspondiente (GoPro, tienda de campaña) pon `done: true`. En la de `progress` (planazos pagados) sube `done`.
+- **Textos y orden**: array `slides`. Tipos disponibles: `title`, `text`, `hours`, `loading`, `progress`, `big`, `final`. `theme` es `green`, `gold`, `ink` o `paper`; `seconds` es lo que dura en pantalla.
+- **Foto**: guarda la imagen en `assets/` y pon su ruta en `photo`. Sale en la primera diapositiva y en la última.
+- **Música**: `spotifyTrack` es el id de la canción en Spotify; se incrusta el reproductor oficial. No subas archivos de música con copyright al repo: es público.
+
+**Modo árbitro**: abrir la web una vez con `#arbitro` al final de la URL enseña el bingo en ese dispositivo antes de la fecha (para probar y preparar la sincronización). El botón «Ver la intro» lo desactiva.
+
+El bloqueo es solo visual y usa el reloj del dispositivo: el contenido del bingo está en `data.js`, que es público. Sirve para no destripar la sorpresa, no como seguridad.
 
 ## Reglas del juego (en código)
 

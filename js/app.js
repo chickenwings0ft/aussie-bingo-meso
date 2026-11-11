@@ -1,4 +1,5 @@
-import { TRIP, GRID, STAGES, PRIZES, CELLS } from './data.js';
+import { TRIP, GRID, STAGES, PRIZES, CELLS, PRELAUNCH } from './data.js';
+import { initPrelaunch } from './prelaunch.js';
 import { createStore, createLocalAdapter } from './store.js';
 import { createSupabaseAdapter, createCode, isValidCode } from './sync.js';
 import { SUPABASE } from './config.js';
@@ -7,6 +8,7 @@ const STORAGE_KEY = 'aussie-bingo-meso:v1';
 
 const INTRO_KEY = 'aussie-bingo-meso:intro';
 const SYNC_CODE_KEY = 'aussie-bingo-meso:sync';
+const REFEREE_KEY = 'aussie-bingo-meso:referee';
 
 // Preferencias de este dispositivo (no forman parte del progreso).
 const readFlag = (key) => {
@@ -438,7 +440,43 @@ tabs.forEach((tab, index) => {
 });
 
 // ── Arranque ────────────────────────────────────────────────────────────────
-renderStatic();
-store.subscribe(update);
-store.init();
-checkJoinLink();
+// El bingo se activa en PRELAUNCH.unlockAt. Antes de esa fecha solo se ve la
+// intro, salvo en modo árbitro: abrir la web con #arbitro una vez lo activa en
+// ese dispositivo (para preparar y probar el cartón antes del viaje).
+function startBingo() {
+  document.documentElement.classList.remove('gate-pending', 'is-locked');
+  renderStatic();
+  store.subscribe(update);
+  store.init();
+  checkJoinLink();
+}
+
+const root = document.documentElement;
+const unlockAt = Date.parse(PRELAUNCH.unlockAt);
+const claimReferee = () => {
+  if (location.hash !== '#arbitro') return false;
+  writeFlag(REFEREE_KEY, '1');
+  history.replaceState(null, '', location.pathname + location.search);
+  return true;
+};
+claimReferee();
+window.addEventListener('hashchange', () => claimReferee() && location.reload());
+const isReferee = readFlag(REFEREE_KEY) === '1';
+
+if (Date.now() >= unlockAt || isReferee) {
+  if (Date.now() < unlockAt) {
+    $('referee').hidden = false;
+    $('referee-exit').addEventListener('click', () => {
+      try {
+        localStorage.removeItem(REFEREE_KEY);
+      } catch {
+        /* sin almacenamiento */
+      }
+      location.reload();
+    });
+  }
+  startBingo();
+} else {
+  root.classList.replace('gate-pending', 'is-locked');
+  initPrelaunch({ onUnlock: startBingo });
+}

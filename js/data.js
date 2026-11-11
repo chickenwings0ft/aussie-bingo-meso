@@ -343,3 +343,104 @@ export const CELLS = [
     rule: 'Los dos en la misma foto. Mejor desde Mrs Macquarie’s Chair o desde el ferry a Manly.',
   },
 ];
+
+// ── Intro previa al viaje ────────────────────────────────────────────────────
+// Hasta `unlockAt` la web solo enseña esta intro (diapositivas + cuenta atrás).
+// A partir de esa fecha se enseña el bingo. Las fechas llevan su huso horario.
+export const PRELAUNCH = {
+  unlockAt: '2026-12-01T09:30:00+10:00', // 1 dic, 9:30 en Gold Coast (Queensland, UTC+10)
+  departureAt: '2026-11-28T12:00:00+01:00', // sábado 28 nov, hora de España (hora provisional)
+  spotifyTrack: '0inB67IHflRVtb2pmnykz8', // id de la canción en Spotify; '' = sin música
+  photo: '', // ruta de la foto (p. ej. 'assets/nosotros.jpg'); '' = sin foto
+  photoAlt: 'Meso y Luk',
+
+  start: {
+    kicker: 'Meso Road Trip 2026',
+    title: 'Tienes un mensaje',
+    button: 'Empezar',
+    again: 'Verlo otra vez',
+    skip: 'Ir a la cuenta atrás',
+    hint: 'Sube el volumen y dale al play de abajo.',
+  },
+
+  // Tipos: title · text · hours · loading · progress · big · final
+  // theme: green · gold · ink · paper      seconds: lo que dura en pantalla
+  slides: [
+    {
+      type: 'title',
+      theme: 'green',
+      kicker: 'Meso Road Trip 2026',
+      title: 'Hello Mesonada',
+      text: 'Bienvenido al viaje de tu vida.',
+      seconds: 5,
+    },
+    {
+      type: 'text',
+      theme: 'gold',
+      text: 'Como sé que tienes ganas y chicken más, se ha preparado una web donde el 1 de diciembre se activará un juego que durará hasta el final del viaje.',
+      seconds: 9,
+    },
+    {
+      type: 'text',
+      theme: 'ink',
+      text: 'De momento no te voy a decir nada del juego, pero mientras tanto…',
+      seconds: 5,
+    },
+    {
+      type: 'hours',
+      theme: 'paper',
+      kicker: 'Horas hasta que salgas de España',
+      unit: 'horas',
+      doneText: '¡Ya estás en camino!',
+      seconds: 6,
+    },
+    {
+      // Cambia done a true cuando la tenga.
+      type: 'loading',
+      theme: 'green',
+      title: 'GoPro Hero 13',
+      done: false,
+      loadingText: 'Loading…',
+      doneText: 'Completado',
+      seconds: 5,
+    },
+    {
+      // Cambia done a true cuando la tenga.
+      type: 'loading',
+      theme: 'gold',
+      title: 'Tienda de campaña',
+      done: false,
+      loadingText: 'Loading…',
+      doneText: 'Completado',
+      seconds: 5,
+    },
+    {
+      // Sube `done` según se vayan pagando.
+      type: 'progress',
+      theme: 'ink',
+      title: 'Planazos pagados guapos',
+      done: 5,
+      total: 8,
+      unit: 'pagados',
+      seconds: 6,
+    },
+    {
+      type: 'big',
+      theme: 'green',
+      title: 'Engorile',
+      big: 'x1.000',
+      seconds: 5,
+    },
+    {
+      // Última diapositiva: se queda fija con los dos contadores.
+      type: 'final',
+      theme: 'ink',
+      title: 'Cuenta atrás',
+      counters: [
+        { label: 'Sales de España', target: 'departureAt', doneText: '¡En camino!' },
+        { label: 'Se activa el juego', target: 'unlockAt', doneText: '¡Ya!' },
+      ],
+      note: 'El juego se activa el 1 de diciembre a las 9:30, hora de Gold Coast.',
+    },
+  ],
+};

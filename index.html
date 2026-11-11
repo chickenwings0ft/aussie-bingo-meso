@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" class="gate-pending">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -11,9 +11,14 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wdth,wght@62..125,400..800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/prelaunch.css">
+  <noscript><style>.gate-pending body > * { visibility: visible; }</style></noscript>
   <script type="module" src="js/app.js"></script>
 </head>
 <body>
+  <!-- Intro previa al viaje: visible hasta la fecha de activación (ver PRELAUNCH en data.js) -->
+  <div id="prelaunch" hidden></div>
+
   <div class="stripes stripes--top" aria-hidden="true"></div>
 
   <header class="wrap head">
@@ -21,6 +26,11 @@
     <h1 class="title" id="title"></h1>
     <p class="route" id="route"></p>
     <p class="people" id="people"></p>
+
+    <p class="referee" id="referee" hidden>
+      <span>Modo árbitro: Meso solo ve la intro hasta que se active el juego.</span>
+      <button class="referee__button" id="referee-exit" type="button">Ver la intro</button>
+    </p>
 
     <details class="intro" id="intro">
       <summary class="intro__summary">
