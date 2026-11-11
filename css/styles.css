@@ -126,7 +126,7 @@ button {
 .title {
   font-family: var(--display);
   font-weight: 400;
-  font-size: clamp(60px, 19vw, 132px);
+  font-size: clamp(50px, 16.4vw, 132px);
   line-height: 1;
   letter-spacing: 0.005em;
   color: var(--green);
@@ -328,7 +328,7 @@ button {
   justify-content: center;
   min-width: 0;
   min-height: 84px;
-  padding: 18px 3px 8px;
+  padding: 18px 2px 8px;
   border: 2px solid var(--green);
   border-radius: var(--radius);
   background: #fff;
@@ -342,7 +342,8 @@ button {
 }
 
 .cell__short {
-  font-size: 11px;
+  font-size: clamp(9.5px, 2.7vw, 13.5px);
+  letter-spacing: -0.01em;
   font-weight: 700;
   line-height: 1.15;
   overflow-wrap: anywhere;
@@ -863,6 +864,31 @@ dialog::backdrop {
   }
 }
 
+/* ── Móviles muy estrechos (320 px) ──────────────────────────────────────── */
+@media (max-width: 359px) {
+  .wrap {
+    padding-left: max(8px, env(safe-area-inset-left));
+    padding-right: max(8px, env(safe-area-inset-right));
+  }
+
+  .grid {
+    gap: 4px;
+  }
+
+  .cell {
+    padding-inline: 1px;
+  }
+
+  .cell__short {
+    font-size: 9.5px;
+    font-stretch: 88%;
+  }
+
+  .tab {
+    font-size: 12px;
+  }
+}
+
 /* ── Móviles grandes y tablets pequeñas: mismo cartón, más aire ──────────── */
 @media (min-width: 480px) {
   .wrap {
@@ -876,11 +902,7 @@ dialog::backdrop {
 
   .cell {
     min-height: 100px;
-    padding: 22px 6px 10px;
-  }
-
-  .cell__short {
-    font-size: 14px;
+    padding: 22px 2px 10px;
   }
 
   .cell__check {
@@ -899,7 +921,7 @@ dialog::backdrop {
   }
 }
 
-/* ── Pantallas grandes: texto completo, como en el PDF ───────────────────── */
+/* ── Tablet y escritorio ───────────────────── */
 @media (min-width: 720px) {
   .wrap {
     padding-left: 32px;
@@ -942,7 +964,10 @@ dialog::backdrop {
   .panel {
     padding-top: 20px;
   }
+}
 
+/* Texto completo en la casilla, como en el PDF */
+@media (min-width: 900px) {
   .grid {
     gap: 10px;
   }
@@ -969,10 +994,10 @@ dialog::backdrop {
 
   .cell__cat {
     padding-right: 28px;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 800;
-    font-stretch: 112%;
-    letter-spacing: 0.1em;
+    font-stretch: 108%;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--green);
   }
@@ -1026,6 +1051,9 @@ dialog::backdrop {
     line-height: 1;
   }
 
+}
+
+@media (min-width: 720px) {
   .rules {
     columns: 2;
     column-gap: 36px;

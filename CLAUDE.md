@@ -6,7 +6,7 @@ Bingo del road trip por Australia (30 nov – 18 dic 2026). Web estática, mobil
 
 ```
 index.html          Esqueleto: cabecera, pestañas, paneles y diálogos (vacíos; los rellena app.js)
-css/styles.css      Todos los estilos. Mobile-first; breakpoints en 480 px y 720 px
+css/styles.css      Todos los estilos. Mobile-first; breakpoints en 360, 480, 720 y 900 px (texto completo de casilla desde 900 px)
 js/data.js          TODO el contenido: cabecera, intro, etapas, casillas, instrucciones, premios
 js/store.js         Estado del cartón + adaptadores de guardado (hoy: localStorage)
 js/app.js           Pintado, ficha de casilla, líneas, avisos, reinicio, pestañas
